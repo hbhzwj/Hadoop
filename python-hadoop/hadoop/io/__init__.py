@@ -15,19 +15,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
-import OutputStream
-import InputStream
+from . import OutputStream
+from . import InputStream
 
-import SequenceFile
-import ArrayFile
-import MapFile
-import SetFile
+from . import SequenceFile
+from . import ArrayFile
+from . import MapFile
+from . import SetFile
 
-from Writable import *
-from IntWritable import *
-from BytesWritable import *
-from Text import *
-import WritableUtils
+from .Writable import *
+from .IntWritable import *
+from .BytesWritable import *
+from .Text import *
+from . import WritableUtils
 
-import compress
+from . import compress

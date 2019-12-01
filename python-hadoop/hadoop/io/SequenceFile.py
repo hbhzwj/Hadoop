@@ -15,29 +15,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
 from hashlib import md5
 from uuid import uuid1
 from time import time
 import os
+import six
 
-from hadoop.util.ReflectionUtils import hadoopClassFromName, hadoopClassName
+from ..util.ReflectionUtils import hadoopClassFromName, hadoopClassName
 
-from compress import CodecPool
+from .compress import CodecPool
 
-from WritableUtils import readVInt, writeVInt
-from Writable import Writable
-from OutputStream import FileOutputStream, DataOutputStream, DataOutputBuffer
-from InputStream import FileInputStream, DataInputStream, DataInputBuffer
-from VersionMismatchException import VersionMismatchException, VersionPrefixException
+from .WritableUtils import readVInt, writeVInt, intToByte, byteToInt
+from .Writable import Writable
+from .OutputStream import FileOutputStream, DataOutputStream, DataOutputBuffer
+from .InputStream import FileInputStream, DataInputStream, DataInputBuffer
+from .VersionMismatchException import VersionMismatchException, VersionPrefixException
 
-from Text import Text
+from .Text import Text
 
-BLOCK_COMPRESS_VERSION  = '\x04'
-CUSTOM_COMPRESS_VERSION = '\x05'
-VERSION_WITH_METADATA   = '\x06'
-VERSION_PREFIX = 'SEQ'
-VERSION = VERSION_PREFIX + VERSION_WITH_METADATA
+BLOCK_COMPRESS_VERSION = 4
+CUSTOM_COMPRESS_VERSION = 5
+VERSION_WITH_METADATA = 6
+VERSION_PREFIX = b'SEQ'
+VERSION = VERSION_PREFIX + intToByte(VERSION_WITH_METADATA)
 
 SYNC_ESCAPE = -1
 SYNC_HASH_SIZE = 16
@@ -45,10 +47,12 @@ SYNC_SIZE = 4 + SYNC_HASH_SIZE
 
 SYNC_INTERVAL = 100 * SYNC_SIZE
 
+
 class CompressionType:
     NONE = 0
     RECORD = 1
-    BLOCK  = 2
+    BLOCK = 2
+
 
 class Metadata(Writable):
     def __init__(self, metadata=None):
@@ -75,15 +79,15 @@ class Metadata(Writable):
     def itervalues(self):
         return self._meta.itervalues()
 
-    def iteritems(self):
-        return self._meta.iteritems()
+    def items(self):
+        return self._meta.items()
 
     def __iter__(self):
-        return self._meta.iteritems()
+        return iter(self._meta.items())
 
     def write(self, data_output):
         data_output.writeInt(len(self._meta))
-        for key, value in self._meta.iteritems():
+        for key, value in self._meta.items():
             Text.writeString(data_output, key)
             Text.writeString(data_output, value)
 
@@ -92,12 +96,17 @@ class Metadata(Writable):
         if count < 0:
             raise IOError("Invalid size: %d for file metadata object" % count)
 
-        for i in xrange(count):
+        for i in range(count):
             key = Text.readString(data_input)
             value = Text.readString(data_input)
             self._meta[key] = value
 
-def createWriter(path, key_class, value_class, metadata=None, compression_type=CompressionType.NONE):
+
+def createWriter(path,
+                 key_class,
+                 value_class,
+                 metadata=None,
+                 compression_type=CompressionType.NONE):
     kwargs = {}
 
     if compression_type == CompressionType.NONE:
@@ -112,16 +121,30 @@ def createWriter(path, key_class, value_class, metadata=None, compression_type=C
 
     return Writer(path, key_class, value_class, metadata, **kwargs)
 
+
 def createRecordWriter(path, key_class, value_class, metadata=None):
     return Writer(path, key_class, value_class, metadata, compress=True)
 
+
 def createBlockWriter(path, key_class, value_class, metadata=None):
-    return Writer(path, key_class, value_class, metadata, compress=True, block_compress=True)
+    return Writer(path,
+                  key_class,
+                  value_class,
+                  metadata,
+                  compress=True,
+                  block_compress=True)
+
 
 class Writer(object):
     COMPRESSION_BLOCK_SIZE = 1000000
 
-    def __init__(self, path, key_class, value_class, metadata, compress=False, block_compress=False):
+    def __init__(self,
+                 path,
+                 key_class,
+                 value_class,
+                 metadata,
+                 compress=False,
+                 block_compress=False):
         if os.path.exists(path):
             raise IOError("File %s already exists." % path)
 
@@ -145,7 +168,8 @@ class Writer(object):
         self._stream = DataOutputStream(FileOutputStream(path))
 
         # sync is 16 random bytes
-        self._sync = md5('%s@%d' % (uuid1().bytes, int(time() * 1000))).digest()
+        self._sync = md5(b'%s@%d' %
+                         (uuid1().bytes, int(time() * 1000))).digest()
 
         self._writeFileHeader()
 
@@ -180,10 +204,12 @@ class Writer(object):
 
     def append(self, key, value):
         if type(key) != self._key_class:
-            raise IOError("Wrong key class %s is not %s" % (type(key), self._key_class))
+            raise IOError("Wrong key class %s is not %s" %
+                          (type(key), self._key_class))
 
         if type(value) != self._value_class:
-            raise IOError("Wrong Value class %s is not %s" % (type(value), self._value_class))
+            raise IOError("Wrong Value class %s is not %s" %
+                          (type(value), self._value_class))
 
         key_buffer = DataOutputBuffer()
         key.write(key_buffer)
@@ -237,6 +263,7 @@ class Writer(object):
             self._last_sync = self._stream.getPos()
 
         if self._block_compress and self._block:
+
             def _writeBuffer(data_buf):
                 buf = self._codec.compress(data_buf.toByteArray())
                 writeVInt(self._stream, len(buf))
@@ -263,7 +290,8 @@ class Writer(object):
         self._stream.writeBoolean(self._block_compress)
 
         if self._codec:
-            Text.writeString(self._stream, 'org.apache.hadoop.io.compress.DefaultCodec')
+            Text.writeString(self._stream,
+                             'org.apache.hadoop.io.compress.DefaultCodec')
 
         self._metadata.write(self._stream)
         self._stream.write(self._sync)
@@ -271,6 +299,7 @@ class Writer(object):
     def _checkAndWriteSync(self):
         if self._stream.getPos() >= (self._last_sync + SYNC_INTERVAL):
             self.sync()
+
 
 class Reader(object):
     def __init__(self, path, start=0, length=0):
@@ -298,7 +327,7 @@ class Reader(object):
 
     def getKeyClass(self):
         if not self._key_class:
-          self._key_class = hadoopClassFromName(self._key_class_name)
+            self._key_class = hadoopClassFromName(self._key_class_name)
         return self._key_class
 
     def getKeyClassName(self):
@@ -306,7 +335,7 @@ class Reader(object):
 
     def getValueClass(self):
         if not self._value_class:
-          self._value_class = hadoopClassFromName(self._value_class_name)
+            self._value_class = hadoopClassFromName(self._value_class_name)
         return self._value_class
 
     def getValueClassName(self):
@@ -347,7 +376,7 @@ class Reader(object):
                 return None
 
             # Read Sync
-            self._stream.readInt() # -1
+            self._stream.readInt()  # -1
             sync_check = self._stream.read(SYNC_HASH_SIZE)
             if sync_check != self._sync:
                 raise IOError("File is corrupt")
@@ -377,7 +406,7 @@ class Reader(object):
     def nextKey(self, key):
         buf = self.nextRawKey()
         if not buf:
-          return False
+            return False
         key.readFields(buf)
         return True
 
@@ -452,9 +481,9 @@ class Reader(object):
             raise VersionPrefixException(VERSION_PREFIX,
                                          version_block[0:len(VERSION_PREFIX)])
 
-        self._version = version_block[len(VERSION_PREFIX)]
-        if self._version > VERSION[len(VERSION_PREFIX)]:
-            raise VersionMismatchException(VERSION[len(VERSION_PREFIX)],
+        self._version = byteToInt(version_block[len(VERSION_PREFIX):])
+        if self._version > VERSION_WITH_METADATA:
+            raise VersionMismatchException(VERSION_WITH_METADATA,
                                            self._version)
 
         if self._version < BLOCK_COMPRESS_VERSION:
@@ -464,7 +493,7 @@ class Reader(object):
             self._key_class_name = Text.readString(self._stream)
             self._value_class_name = Text.readString(self._stream)
 
-        if ord(self._version) > 2:
+        if self._version > 2:
             self._decompress = self._stream.readBoolean()
         else:
             self._decompress = False

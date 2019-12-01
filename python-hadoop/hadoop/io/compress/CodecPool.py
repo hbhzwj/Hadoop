@@ -15,12 +15,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
-from hadoop.util import ReflectionUtils
+from ...util import ReflectionUtils
 
-from BZip2Codec import *
-from ZlibCodec import *
-from GzipCodec import *
+from .BZip2Codec import *
+from .ZlibCodec import *
+from .GzipCodec import *
+
 
 class CodecPool(object):
     def __new__(cls, *p, **k):
@@ -39,4 +41,3 @@ class CodecPool(object):
             return DefaultCodec()
         codec_class = ReflectionUtils.hadoopClassFromName(class_path)
         return codec_class()
-

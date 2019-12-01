@@ -15,8 +15,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
-from Writable import AbstractValueWritable
+from .Writable import AbstractValueWritable
+from .WritableUtils import intToByte
+
 
 class BytesWritable(AbstractValueWritable):
     def write(self, data_output):
@@ -28,4 +31,4 @@ class BytesWritable(AbstractValueWritable):
         self._value = data_input.readFully(size)
 
     def toString(self):
-        return ''.join(chr(x % 256) for x in self._value)
+        return b''.join(intToByte(x) for x in self._value)

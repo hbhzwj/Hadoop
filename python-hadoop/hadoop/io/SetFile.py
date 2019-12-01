@@ -15,9 +15,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
-from NullWritable import NullWritable
-import MapFile
+from .NullWritable import NullWritable
+from . import MapFile
+
 
 class Writer(MapFile.Writer):
     def __init__(self, path, key_class):
@@ -25,6 +27,7 @@ class Writer(MapFile.Writer):
 
     def append(self, key):
         return super(Writer, self).append(key, NullWritable())
+
 
 class Reader(MapFile.Reader):
     def next(self, key):
@@ -34,4 +37,3 @@ class Reader(MapFile.Reader):
         if self.seek(key):
             return self._next_key
         return None
-

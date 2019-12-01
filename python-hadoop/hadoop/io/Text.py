@@ -15,9 +15,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
-from Writable import WritableComparable
-from WritableUtils import readVInt, writeVInt
+from .Writable import WritableComparable
+from .WritableUtils import readVInt, writeVInt
+
 
 class Text(WritableComparable):
     def __init__(self):
@@ -78,4 +80,3 @@ class Text(WritableComparable):
     @staticmethod
     def decode(bytes):
         return bytes.decode('utf-8')
-

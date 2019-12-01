@@ -15,14 +15,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import print_function, division, absolute_import
 import os
 
-from IntWritable import LongWritable
-import SequenceFile
+from .IntWritable import LongWritable
+from . import SequenceFile
 
 INDEX_FILE_NAME = 'index'
 DATA_FILE_NAME = 'data'
+
 
 class Writer(object):
     INDEX_INTERVAL = 128
@@ -31,10 +32,12 @@ class Writer(object):
         os.mkdir(dirname)
 
         data_path = os.path.join(dirname, DATA_FILE_NAME)
-        self._data = SequenceFile.createWriter(data_path, key_class, value_class)
+        self._data = SequenceFile.createWriter(data_path, key_class,
+                                               value_class)
 
         index_path = os.path.join(dirname, INDEX_FILE_NAME)
-        self._index = SequenceFile.createBlockWriter(index_path, key_class, LongWritable)
+        self._index = SequenceFile.createBlockWriter(index_path, key_class,
+                                                     LongWritable)
 
         self._size = 0
         self._last_index_pos = -1
@@ -59,12 +62,14 @@ class Writer(object):
     def _checkKey(self, key):
         pass
 
+
 class Reader(object):
     INDEX_SKIP = 0
 
     def __init__(self, dirname):
         self._data = SequenceFile.Reader(os.path.join(dirname, DATA_FILE_NAME))
-        self._index = SequenceFile.Reader(os.path.join(dirname, INDEX_FILE_NAME))
+        self._index = SequenceFile.Reader(
+            os.path.join(dirname, INDEX_FILE_NAME))
         self._first_position = self._data.getPosition()
         self._positions = []
         self._keys = []
@@ -200,4 +205,3 @@ class Reader(object):
             else:
                 return mid
         return -(low + 1)
-

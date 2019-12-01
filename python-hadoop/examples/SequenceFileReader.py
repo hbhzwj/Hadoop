@@ -15,6 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
 import sys
 
@@ -22,7 +23,7 @@ from hadoop.io import SequenceFile
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print 'usage: SequenceFileReader <filename>'
+        print('usage: SequenceFileReader <filename>')
     else:
         reader = SequenceFile.Reader(sys.argv[1])
 
@@ -35,9 +36,9 @@ if __name__ == '__main__':
         #reader.sync(4042)
         position = reader.getPosition()
         while reader.next(key, value):
-            print '*' if reader.syncSeen() else ' ',
-            print '[%6s] %6s %6s' % (position, key.toString(), value.toString())
+            print('*' if reader.syncSeen() else ' ', end=''),
+            print('[%6s] %6s %6s' %
+                  (position, key.toString(), value.toString()))
             position = reader.getPosition()
 
         reader.close()
-

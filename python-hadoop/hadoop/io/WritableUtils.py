@@ -16,8 +16,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import six
+
+
+def intToByte(version):
+    if six.PY2:
+        return chr(version % 256)
+    else:
+        return version.to_bytes(1, 'little', signed=True)
+
+
+def byteToInt(input_byte):
+    if six.PY2:
+        return ord(input_byte)
+    else:
+        return int.from_bytes(input_byte, 'little', signed=True)
+
+
 def readVInt(data_input):
     return readVLong(data_input)
+
 
 def readVLong(data_input):
     first_byte = data_input.readByte()
@@ -26,15 +44,17 @@ def readVLong(data_input):
         return first_byte
 
     i = 0
-    for idx in xrange(length - 1):
+    for idx in range(length - 1):
         b = data_input.readUByte()
         i = i << 8
         i = i | b
 
     return (i ^ -1) if isNegativeVInt(first_byte) else i
 
+
 def writeVInt(data_output, value):
     return writeVLong(data_output, value)
+
 
 def writeVLong(data_output, value):
     if value >= -112 and value <= 127:
@@ -60,8 +80,10 @@ def writeVLong(data_output, value):
         x = (value & mask) >> shiftbits
         data_output.writeUByte(x)
 
+
 def isNegativeVInt(value):
     return value < -120 or (value >= -112 and value < 0)
+
 
 def decodeVIntSize(value):
     if value >= -112:

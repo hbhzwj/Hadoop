@@ -15,9 +15,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
-from Writable import AbstractValueWritable
-from WritableUtils import readVInt, readVLong, writeVInt, writeVLong
+from .Writable import AbstractValueWritable
+from .WritableUtils import readVInt, readVLong, writeVInt, writeVLong
+
 
 class IntWritable(AbstractValueWritable):
     def write(self, data_output):
@@ -26,12 +28,14 @@ class IntWritable(AbstractValueWritable):
     def readFields(self, data_input):
         self._value = data_input.readInt()
 
+
 class LongWritable(AbstractValueWritable):
     def write(self, data_output):
         data_output.writeLong(self._value)
 
     def readFields(self, data_input):
         self._value = data_input.readLong()
+
 
 class VIntWritable(AbstractValueWritable):
     def write(self, data_output):
@@ -40,10 +44,10 @@ class VIntWritable(AbstractValueWritable):
     def readFields(self, data_input):
         self._value = readVInt(data_input)
 
+
 class VLongWritable(AbstractValueWritable):
     def write(self, data_output):
         writeVLong(data_output, self._value)
 
     def readFields(self, data_input):
         self._value = readVLong(data_input)
-

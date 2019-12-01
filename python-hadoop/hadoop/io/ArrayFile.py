@@ -15,9 +15,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
-from IntWritable import LongWritable
-import MapFile
+from .IntWritable import LongWritable
+from . import MapFile
+
 
 class Writer(MapFile.Writer):
     def __init__(self, path, value_class):
@@ -27,6 +29,7 @@ class Writer(MapFile.Writer):
     def append(self, value):
         super(Writer, self).append(LongWritable(self._count), value)
         self._count += 1
+
 
 class Reader(MapFile.Reader):
     def __init__(self, path):
@@ -45,5 +48,4 @@ class Reader(MapFile.Reader):
 
     def get(self, n, value):
         self._key.set(n)
-        return(super(Reader, self).get(self._key, value))
-
+        return (super(Reader, self).get(self._key, value))

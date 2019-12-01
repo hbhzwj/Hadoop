@@ -18,7 +18,8 @@
 
 import zlib
 
-from hadoop.io.InputStream import DataInputBuffer
+from ..InputStream import DataInputBuffer
+
 
 class ZlibCodec:
     def compress(self, data):
@@ -30,5 +31,5 @@ class ZlibCodec:
     def decompressInputStream(self, data):
         return DataInputBuffer(zlib.decompress(data))
 
-DefaultCodec = ZlibCodec
 
+DefaultCodec = ZlibCodec

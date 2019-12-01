@@ -15,31 +15,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
 from hadoop.io.SequenceFile import CompressionType
 from hadoop.io import LongWritable
 from hadoop.io import SequenceFile
 
+
 def writeData(writer):
     key = LongWritable()
     value = LongWritable()
 
-    for i in xrange(1000):
+    for i in range(1000):
         key.set(1000 - i)
         value.set(i)
-        print '[%d] %s %s' % (writer.getLength(), key.toString(), value.toString())
+        print('[%d] %s %s' %
+              (writer.getLength(), key.toString(), value.toString()))
         writer.append(key, value)
+
 
 if __name__ == '__main__':
     writer = SequenceFile.createWriter('test.seq', LongWritable, LongWritable)
     writeData(writer)
     writer.close()
 
-    writer = SequenceFile.createWriter('test-record.seq', LongWritable, LongWritable, compression_type=CompressionType.RECORD)
+    writer = SequenceFile.createWriter('test-record.seq',
+                                       LongWritable,
+                                       LongWritable,
+                                       compression_type=CompressionType.RECORD)
     writeData(writer)
     writer.close()
 
-    writer = SequenceFile.createWriter('test-block.seq', LongWritable, LongWritable, compression_type=CompressionType.BLOCK)
+    writer = SequenceFile.createWriter('test-block.seq',
+                                       LongWritable,
+                                       LongWritable,
+                                       compression_type=CompressionType.BLOCK)
     writeData(writer)
     writer.close()
-

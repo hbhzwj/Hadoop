@@ -15,37 +15,43 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
 from hadoop.io.SequenceFile import CompressionType
 from hadoop.io.SequenceFile import Metadata
 from hadoop.io import LongWritable
 from hadoop.io import SequenceFile
 
+
 def writeData(writer):
     key = LongWritable()
     value = LongWritable()
 
-    for i in xrange(10):
+    for i in range(10):
         key.set(1000 - i)
         value.set(i)
-        print '[%d] %s %s' % (writer.getLength(), key.toString(), value.toString())
+        print('[%d] %s %s' %
+              (writer.getLength(), key.toString(), value.toString()))
         writer.append(key, value)
+
 
 def testWrite(filename):
     metadata = Metadata()
     metadata.set('Meta Key 0', 'Meta Value 0')
     metadata.set('Meta Key 1', 'Meta Value 1')
 
-    writer = SequenceFile.createWriter(filename, LongWritable, LongWritable, metadata)
+    writer = SequenceFile.createWriter(filename, LongWritable, LongWritable,
+                                       metadata)
     writeData(writer)
     writer.close()
+
 
 def testRead(filename):
     reader = SequenceFile.Reader(filename)
 
     metadata = reader.getMetadata()
     for meta_key, meta_value in metadata:
-        print 'METADATA:', meta_key, meta_value
+        print('METADATA:', meta_key, meta_value)
 
     key_class = reader.getKeyClass()
     value_class = reader.getValueClass()
@@ -55,11 +61,12 @@ def testRead(filename):
 
     position = reader.getPosition()
     while reader.next(key, value):
-        print '*' if reader.syncSeen() else ' ',
-        print '[%6s] %6s %6s' % (position, key.toString(), value.toString())
+        print('*' if reader.syncSeen() else ' ', end='')
+        print('[%6s] %6s %6s' % (position, key.toString(), value.toString()))
         position = reader.getPosition()
 
     reader.close()
+
 
 if __name__ == '__main__':
     filename = 'test-meta.seq'

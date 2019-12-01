@@ -15,23 +15,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import print_function, division, absolute_import
 
 import gzip
 
-from hadoop.io.InputStream import DataInputBuffer
-import StringIO
+from ..InputStream import DataInputBuffer
+from six import StringIO
+
 
 class GzipCodec:
     def compress(self, data):
         ioObj = StringIO.StringIO()
-        f = gzip.GzipFile(fileobj = ioObj, mode='wb')
+        f = gzip.GzipFile(fileobj=ioObj, mode='wb')
         f.write(data)
         f.close()
         return ioObj.getValue()
 
     def decompress(self, data):
         ioObj = StringIO.StringIO(data)
-        f = gzip.GzipFile(fileobj = ioObj, mode='rb')
+        f = gzip.GzipFile(fileobj=ioObj, mode='rb')
         d = f.read()
         f.close()
         return d

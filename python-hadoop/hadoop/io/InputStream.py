@@ -19,6 +19,7 @@
 import struct
 import os
 
+
 class InputStream(object):
     def available(self):
         raise NotImplementedError
@@ -47,6 +48,7 @@ class InputStream(object):
     def skip(self, n):
         raise NotImplementedError
 
+
 class ByteArrayInputStream(InputStream):
     def __init__(self, data='', offset=0, length=0):
         self.reset(data, offset, length)
@@ -55,7 +57,7 @@ class ByteArrayInputStream(InputStream):
         return self._count - self._offset
 
     def toByteArray(self):
-        return self._buffer[self._offset:self._offset+self._count]
+        return self._buffer[self._offset:self._offset + self._count]
 
     def reset(self, data, offset=0, length=0):
         if data and not length:
@@ -71,9 +73,10 @@ class ByteArrayInputStream(InputStream):
         pass
 
     def read(self, length):
-        data = self._buffer[self._offset:self._offset+length]
+        data = self._buffer[self._offset:self._offset + length]
         self._offset += length
         return data
+
 
 class FileInputStream(InputStream):
     def __init__(self, path):
@@ -105,7 +108,7 @@ class FileInputStream(InputStream):
             data_length = len(data)
             byte_buffer.append(data)
             length -= data_length
-        return ''.join(byte_buffer)
+        return b''.join(byte_buffer)
 
     def skip(self, n):
         skip_length = 0
@@ -118,6 +121,7 @@ class FileInputStream(InputStream):
             skip_length += data_length
             n -= data_length
         return skip_length
+
 
 class DataInputStream(InputStream):
     def __init__(self, input_stream):
@@ -144,7 +148,7 @@ class DataInputStream(InputStream):
         return struct.unpack(">b", data)[0]
 
     def readFully(self, length):
-        return [self.readByte() for _ in xrange(length)]
+        return [self.readByte() for _ in range(length)]
 
     def readUByte(self):
         data = self._stream.read(1)
@@ -173,6 +177,7 @@ class DataInputStream(InputStream):
     def skipBytes(self, n):
         return self._stream.skip(n)
 
+
 class DataInputBuffer(DataInputStream):
     def __init__(self, data='', offset=0, length=0):
         input_stream = ByteArrayInputStream(data, offset, length)
@@ -186,4 +191,3 @@ class DataInputBuffer(DataInputStream):
 
     def toByteArray(self):
         return self._stream.toByteArray()
-

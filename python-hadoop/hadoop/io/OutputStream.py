@@ -18,6 +18,7 @@
 
 import struct
 
+
 class OutputStream(object):
     def close(self):
         raise NotImplementedError
@@ -30,6 +31,7 @@ class OutputStream(object):
 
     def write(self, data):
         raise NotImplementedError
+
 
 class FileOutputStream(OutputStream):
     def __init__(self, path):
@@ -52,6 +54,7 @@ class FileOutputStream(OutputStream):
 
     def write(self, value):
         return self._fd.write(value)
+
 
 class DataOutputStream(object):
     def __init__(self, output_stream):
@@ -108,6 +111,7 @@ class DataOutputStream(object):
     def skipBytes(self, n):
         return self._stream.skip(n)
 
+
 class ByteArrayOutputStream(OutputStream):
     def __init__(self):
         self._buffer = []
@@ -117,7 +121,7 @@ class ByteArrayOutputStream(OutputStream):
         return self._count
 
     def toByteArray(self):
-        return ''.join(self._buffer)
+        return b''.join(self._buffer)
 
     def reset(self):
         self._buffer = []
@@ -132,6 +136,7 @@ class ByteArrayOutputStream(OutputStream):
     def write(self, bytes):
         self._buffer.append(bytes)
         self._count += len(bytes)
+
 
 class DataOutputBuffer(DataOutputStream):
     def __init__(self):
@@ -151,4 +156,3 @@ class DataOutputBuffer(DataOutputStream):
 
     def toByteArray(self):
         return self._stream.toByteArray()
-

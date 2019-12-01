@@ -16,12 +16,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from hadoop.io import *
+from ..io import *
+
+_PREFIXS = ['org.apache.', 'experimental.']
+
 
 def hadoopClassFromName(class_path):
-    if class_path.startswith('org.apache.hadoop.'):
-        class_path = class_path[11:]
+    for prefix in _PREFIXS:
+        if class_path.startswith(prefix):
+            class_path = class_path[len(prefix):]
+
     return classFromName(class_path)
+
 
 def hadoopClassName(class_type):
     if hasattr(class_type, "hadoop_module_name") and \
@@ -36,11 +42,11 @@ def hadoopClassName(class_type):
         return 'org.apache.%s.%s' % (module_name, class_name)
     return '%s.%s' % (module_name, class_name)
 
+
 def classFromName(class_path):
     module_name, _, class_name = class_path.rpartition('.')
     if not module_name:
         raise ValueError('Class name must contain module part.')
 
-    module = __import__(module_name, globals(), locals(), [str(class_name)], -1)
+    module = __import__(module_name, globals(), locals(), [str(class_name)], 0)
     return getattr(module, class_name)
-
